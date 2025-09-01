@@ -1,0 +1,12 @@
+
+{win}c_compiler=mingw64
+guilib=
+{unix}libs=dl
+$PGINC=.
+
+{win}def_cflags=-c -I..\..\api
+{unix}def_cflags=-c -Wall -I../../api
+{unix}def_lflags=-O1 -L/usr/lib/x86_64-linux-gnu
+
+srcpath=../../api
+pg.c -I$PGINC
