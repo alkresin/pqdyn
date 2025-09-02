@@ -9,13 +9,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #define LIB_HANDLE HMODULE
-#define LOAD_LIBRARY(libname) LoadLibraryA(libname)
 #define GET_FUNCTION GetProcAddress
 #define CLOSE_LIBRARY FreeLibrary
 #else
 #include <dlfcn.h>
 #define LIB_HANDLE void*
-#define LOAD_LIBRARY(libname) dlopen(libname, RTLD_LAZY)
 #define GET_FUNCTION dlsym
 #define CLOSE_LIBRARY dlclose
 #endif
@@ -28,37 +26,37 @@
 //#include "libpq-fe.h"
 #include "pg.h"
 
-typedef int (*ppg_libver_t)();
-typedef int	(*ppg_srvver_t)(const PGconn *conn);
-typedef PGPing (*ppg_ping_t)(const char *conninfo);
-typedef PGconn* (*ppg_connectdb_t)(const char *szConnInfo);
-typedef void (*ppg_finish_t)(PGconn *conn);
-typedef ConnStatusType (*ppg_status_t)(const PGconn *conn);
-typedef PGresult* (*ppg_exec_t)(PGconn *conn, const char *query);
-typedef PGresult* (*ppg_execParams_t)(PGconn *conn, const char *command, int nParams,
+typedef int (*ppq_libver_t)();
+typedef int	(*ppq_srvver_t)(const PGconn *conn);
+typedef PGPing (*ppq_ping_t)(const char *conninfo);
+typedef PGconn* (*ppq_connectdb_t)(const char *szConnInfo);
+typedef void (*ppq_finish_t)(PGconn *conn);
+typedef ConnStatusType (*ppq_status_t)(const PGconn *conn);
+typedef PGresult* (*ppq_exec_t)(PGconn *conn, const char *query);
+typedef PGresult* (*ppq_execParams_t)(PGconn *conn, const char *command, int nParams,
    const Oid *paramTypes, const char *const *paramValues, const int *paramLengths,
    const int *paramFormats, int resultFormat );
-typedef ExecStatusType (*ppg_resultStatus_t)(const PGresult *res);
-typedef void (*ppg_clear_t)(PGresult *res);
-typedef char * (*ppg_getvalue_t)(const PGresult *res, int tup_num, int field_num);
-typedef int	(*ppg_ntuples_t)(const PGresult *res);
-typedef int	(*ppg_nfields_t)(const PGresult *res);
-typedef char* (*ppg_fname_t)(const PGresult *res, int field_num);
+typedef ExecStatusType (*ppq_resultStatus_t)(const PGresult *res);
+typedef void (*ppq_clear_t)(PGresult *res);
+typedef char * (*ppq_getvalue_t)(const PGresult *res, int tup_num, int field_num);
+typedef int	(*ppq_ntuples_t)(const PGresult *res);
+typedef int	(*ppq_nfields_t)(const PGresult *res);
+typedef char* (*ppq_fname_t)(const PGresult *res, int field_num);
 
-static ppg_libver_t ppg_libver = NULL;
-static ppg_srvver_t ppg_srvver = NULL;
-static ppg_ping_t ppg_ping = NULL;
-static ppg_connectdb_t ppg_connectdb = NULL;
-static ppg_finish_t ppg_finish = NULL;
-static ppg_status_t ppg_status = NULL;
-static ppg_exec_t ppg_exec = NULL;
-static ppg_execParams_t ppg_execParams = NULL;
-static ppg_resultStatus_t ppg_resultStatus = NULL;
-static ppg_clear_t ppg_clear = NULL;
-static ppg_getvalue_t ppg_getvalue = NULL;
-static ppg_ntuples_t ppg_ntuples = NULL;
-static ppg_nfields_t ppg_nfields = NULL;
-static ppg_fname_t ppg_fname = NULL;
+static ppq_libver_t ppq_libver = NULL;
+static ppq_srvver_t ppq_srvver = NULL;
+static ppq_ping_t ppq_ping = NULL;
+static ppq_connectdb_t ppq_connectdb = NULL;
+static ppq_finish_t ppq_finish = NULL;
+static ppq_status_t ppq_status = NULL;
+static ppq_exec_t ppq_exec = NULL;
+static ppq_execParams_t ppq_execParams = NULL;
+static ppq_resultStatus_t ppq_resultStatus = NULL;
+static ppq_clear_t ppq_clear = NULL;
+static ppq_getvalue_t ppq_getvalue = NULL;
+static ppq_ntuples_t ppq_ntuples = NULL;
+static ppq_nfields_t ppq_nfields = NULL;
+static ppq_fname_t ppq_fname = NULL;
 
 LIB_HANDLE pDll = NULL;
 
@@ -157,14 +155,14 @@ static BOOL AddDirectoryToPath( const char* filePath ) {
 static void FindAndOpenLib( const char* szDllName ) {
 
    if( !szDllName ) {
-      pDll = LOAD_LIBRARY( "libpq.dll" );
+      pDll = LoadLibraryA( "libpq.dll" );
       if( !pDll )
          c_writelog( NULL, "Failed to load libpq.dll\n" );
       return;
    }
 
    AddDirectoryToPath(  szDllName );
-   pDll = LOAD_LIBRARY( szDllName );
+   pDll = LoadLibraryA( szDllName );
 }
 #else
 
@@ -280,53 +278,52 @@ static void FindAndOpenLib( const char* szDllName ) {
 }
 #endif
 
-int pg_Init( const char* szDllName ) {
+int pq_Init( const char* szDllName ) {
 
-   //pDll = LOAD_LIBRARY( szDllName );
    FindAndOpenLib( szDllName );
    if (!pDll ) {
       c_writelog( NULL, "Failed to load library\n" );
       return 1;
    }
 
-   if( !ppg_connectdb ) {
-      ppg_connectdb = (ppg_connectdb_t)GET_FUNCTION( pDll, "PQconnectdb" );
-      if( !ppg_connectdb ) {
+   if( !ppq_connectdb ) {
+      ppq_connectdb = (ppq_connectdb_t)GET_FUNCTION( pDll, "PQconnectdb" );
+      if( !ppq_connectdb ) {
          c_writelog( NULL, "Failed to get PQconnectdb\n" );
          return 2;
       }
    }
-   if( !ppg_finish ) {
-      ppg_finish = (ppg_finish_t)GET_FUNCTION( pDll, "PQfinish" );
-      if( !ppg_finish ) {
+   if( !ppq_finish ) {
+      ppq_finish = (ppq_finish_t)GET_FUNCTION( pDll, "PQfinish" );
+      if( !ppq_finish ) {
          c_writelog( NULL, "Failed to get PQfinish\n" );
          return 2;
       }
    }
-   if( !ppg_exec ) {
-      ppg_exec = (ppg_exec_t)GET_FUNCTION( pDll, "PQexec" );
-      if( !ppg_exec ) {
+   if( !ppq_exec ) {
+      ppq_exec = (ppq_exec_t)GET_FUNCTION( pDll, "PQexec" );
+      if( !ppq_exec ) {
          c_writelog( NULL, "Failed to get PQexec\n" );
          return 2;
       }
    }
-   if( !ppg_execParams ) {
-      ppg_execParams = (ppg_execParams_t)GET_FUNCTION( pDll, "PQexecParams" );
-      if( !ppg_exec ) {
+   if( !ppq_execParams ) {
+      ppq_execParams = (ppq_execParams_t)GET_FUNCTION( pDll, "PQexecParams" );
+      if( !ppq_exec ) {
          c_writelog( NULL, "Failed to get PQexecParams\n" );
          return 2;
       }
    }
-   if( !ppg_status ) {
-      ppg_status = (ppg_status_t)GET_FUNCTION( pDll, "PQstatus" );
-      if( !ppg_status ) {
+   if( !ppq_status ) {
+      ppq_status = (ppq_status_t)GET_FUNCTION( pDll, "PQstatus" );
+      if( !ppq_status ) {
          c_writelog( NULL, "Failed to get PQstatus\n" );
          return -1;
       }
    }
-   if( !ppg_resultStatus ) {
-      ppg_resultStatus = (ppg_resultStatus_t)GET_FUNCTION( pDll, "PQresultStatus" );
-      if( !ppg_resultStatus ) {
+   if( !ppq_resultStatus ) {
+      ppq_resultStatus = (ppq_resultStatus_t)GET_FUNCTION( pDll, "PQresultStatus" );
+      if( !ppq_resultStatus ) {
          c_writelog( NULL, "Failed to get PQresultStatus\n" );
          return -1;
       }
@@ -335,162 +332,162 @@ int pg_Init( const char* szDllName ) {
    return 0;
 }
 
-void pg_Exit() {
+void pq_Exit() {
 
    if( pDll )
       CLOSE_LIBRARY( pDll );
    pDll = NULL;
 }
 
-int pg_libVersion() {
+int pq_libVersion() {
 
    if( !pDll )
       return -1;
-   if( !ppg_libver ) {
-      ppg_libver = (ppg_libver_t)GET_FUNCTION( pDll, "PQlibVersion" );
-      if( !ppg_libver ) {
+   if( !ppq_libver ) {
+      ppq_libver = (ppq_libver_t)GET_FUNCTION( pDll, "PQlibVersion" );
+      if( !ppq_libver ) {
          c_writelog( NULL, "Failed to get PQlibVersion\n" );
          return -1;
       }
    }
-   return ppg_libver();
+   return ppq_libver();
 }
 
-int pg_srvVersion( const PGconn * conn ) {
+int pq_srvVersion( const PGconn * conn ) {
 
    if( !pDll )
       return -1;
-   if( !ppg_srvver ) {
-      ppg_srvver = (ppg_srvver_t)GET_FUNCTION( pDll, "PQserverVersion" );
-      if( !ppg_srvver ) {
+   if( !ppq_srvver ) {
+      ppq_srvver = (ppq_srvver_t)GET_FUNCTION( pDll, "PQserverVersion" );
+      if( !ppq_srvver ) {
          c_writelog( NULL, "Failed to get PQserverVersion\n" );
          return -1;
       }
    }
-   return ppg_srvver( conn );
+   return ppq_srvver( conn );
 }
 
-PGPing pg_ping( const char * szConnInfo ) {
+PGPing pq_ping( const char * szConnInfo ) {
 
    if( !pDll )
       return -1;
-   if( !ppg_ping ) {
-      ppg_ping = (ppg_ping_t)GET_FUNCTION( pDll, "PQping" );
-      if( !ppg_ping ) {
+   if( !ppq_ping ) {
+      ppq_ping = (ppq_ping_t)GET_FUNCTION( pDll, "PQping" );
+      if( !ppq_ping ) {
          c_writelog( NULL, "Failed to get PQping\n" );
          return -1;
       }
    }
-   return ppg_ping( szConnInfo );
+   return ppq_ping( szConnInfo );
 }
 
-PGconn * pg_connectDb( const char * szConnInfo ) {
+PGconn * pq_connectDb( const char * szConnInfo ) {
 
    if( !pDll )
       return NULL;
-   return ppg_connectdb( szConnInfo );
+   return ppq_connectdb( szConnInfo );
 }
 
-ConnStatusType pg_status( const PGconn *conn ) {
+ConnStatusType pq_status( const PGconn *conn ) {
 
    if( !pDll )
       return CONNECTION_BAD;
-   return ppg_status( conn );
+   return ppq_status( conn );
 }
 
-void pg_finish( PGconn *conn ) {
+void pq_finish( PGconn *conn ) {
 
    if( !pDll )
       return;
-   ppg_finish( conn );
+   ppq_finish( conn );
 }
 
-PGresult* pg_exec( PGconn *conn, const char *query ) {
+PGresult* pq_exec( PGconn *conn, const char *query ) {
 
    if( !pDll )
       return NULL;
-   return ppg_exec( conn, query );
+   return ppq_exec( conn, query );
 }
 
-PGresult* pg_execParams( PGconn *conn, const char *command, int nParams,
+PGresult* pq_execParams( PGconn *conn, const char *command, int nParams,
    const Oid *paramTypes, const char *const *paramValues, const int *paramLengths,
    const int *paramFormats, int resultFormat ) {
 
    if( !pDll )
       return NULL;
-   return ppg_execParams( conn, command, nParams, paramTypes, paramValues,
+   return ppq_execParams( conn, command, nParams, paramTypes, paramValues,
       paramLengths, paramFormats, resultFormat );
 }
 
-ExecStatusType pg_resultStatus( const PGresult *res ) {
+ExecStatusType pq_resultStatus( const PGresult *res ) {
 
    if( !pDll )
       return PGRES_FATAL_ERROR;
-   return ppg_resultStatus( res );
+   return ppq_resultStatus( res );
 }
 
-void pg_clear( PGresult *res ) {
+void pq_clear( PGresult *res ) {
 
    if( !pDll )
       return;
-   ppg_clear( res );
+   ppq_clear( res );
 }
 
-char* pg_getvalue( const PGresult *res, int tup_num, int field_num ) {
+char* pq_getvalue( const PGresult *res, int tup_num, int field_num ) {
 
    if( !pDll )
       return NULL;
-   if( !ppg_getvalue ) {
-      ppg_getvalue = (ppg_getvalue_t)GET_FUNCTION( pDll, "PQgetvalue" );
-      if( !ppg_getvalue ) {
+   if( !ppq_getvalue ) {
+      ppq_getvalue = (ppq_getvalue_t)GET_FUNCTION( pDll, "PQgetvalue" );
+      if( !ppq_getvalue ) {
          c_writelog( NULL, "Failed to get PQgetvalue\n" );
          return NULL;
       }
    }
-   return ppg_getvalue( res, tup_num, field_num );
+   return ppq_getvalue( res, tup_num, field_num );
 }
 
-int pg_ntuples( PGresult *res ) {
+int pq_ntuples( PGresult *res ) {
 
    if( !pDll )
       return -1;
-   if( !ppg_ntuples ) {
-      ppg_ntuples = (ppg_ntuples_t)GET_FUNCTION( pDll, "PQntuples" );
-      if( !ppg_ntuples ) {
+   if( !ppq_ntuples ) {
+      ppq_ntuples = (ppq_ntuples_t)GET_FUNCTION( pDll, "PQntuples" );
+      if( !ppq_ntuples ) {
          c_writelog( NULL, "Failed to get PQntuples\n" );
          return -1;
       }
    }
 
-   return ppg_ntuples( res );
+   return ppq_ntuples( res );
 }
 
-int pg_nfields( PGresult *res ) {
+int pq_nfields( PGresult *res ) {
 
    if( !pDll )
       return -1;
-   if( !ppg_nfields ) {
-      ppg_nfields = (ppg_nfields_t)GET_FUNCTION( pDll, "PQnfields" );
-      if( !ppg_ntuples ) {
+   if( !ppq_nfields ) {
+      ppq_nfields = (ppq_nfields_t)GET_FUNCTION( pDll, "PQnfields" );
+      if( !ppq_ntuples ) {
          c_writelog( NULL, "Failed to get PQnfields\n" );
          return -1;
       }
    }
 
-   return ppg_nfields( res );
+   return ppq_nfields( res );
 }
 
-char * pg_fname( PGresult *res, int field_num ) {
+char * pq_fname( PGresult *res, int field_num ) {
 
    if( !pDll )
       return NULL;
-   if( !ppg_fname ) {
-      ppg_fname = (ppg_fname_t)GET_FUNCTION( pDll, "PQfname" );
-      if( !ppg_fname ) {
+   if( !ppq_fname ) {
+      ppq_fname = (ppq_fname_t)GET_FUNCTION( pDll, "PQfname" );
+      if( !ppq_fname ) {
          c_writelog( NULL, "Failed to get PQfname\n" );
          return NULL;
       }
    }
 
-   return ppg_fname( res, field_num );
+   return ppq_fname( res, field_num );
 }

@@ -80,21 +80,21 @@ typedef enum
 	PGRES_TUPLES_CHUNK			/* chunk of tuples from larger resultset */
 } ExecStatusType;
 
-extern int pg_Init( const char* szDllName);
-extern void pg_Exit();
-extern int pg_libVersion();
-extern int pg_srvVersion( const PGconn *conn );
-extern PGPing pg_ping( const char * szConnInfo );
-extern PGconn * pg_connectDb( const char * szConnInfo );
-extern void pg_finish( PGconn *conn );
-extern ConnStatusType pg_status( const PGconn *conn );
-extern PGresult* pg_exec( PGconn *conn, const char *query );
-extern PGresult* pg_execParams( PGconn *conn, const char *command, int nParams,
+extern int pq_Init( const char* szDllName);
+extern void pq_Exit();
+extern int pq_libVersion();
+extern int pq_srvVersion( const PGconn *conn );
+extern PGPing pq_ping( const char * szConnInfo );
+extern PGconn * pq_connectDb( const char * szConnInfo );
+extern void pq_finish( PGconn *conn );
+extern ConnStatusType pq_status( const PGconn *conn );
+extern PGresult* pq_exec( PGconn *conn, const char *query );
+extern PGresult* pq_execParams( PGconn *conn, const char *command, int nParams,
    const Oid *paramTypes, const char *const *paramValues, const int *paramLengths,
    const int *paramFormats, int resultFormat );
-extern ExecStatusType pg_resultStatus( const PGresult *res );
-extern void pg_clear( PGresult *res );
-extern char* pg_getvalue( const PGresult *res, int tup_num, int field_num );
-extern int pg_ntuples( PGresult *res );
-extern int pg_nfields( PGresult *res );
-extern char* pg_fname( PGresult *res, int field_num );
+extern ExecStatusType pq_resultStatus( const PGresult *res );
+extern void pq_clear( PGresult *res );
+extern char* pq_getvalue( const PGresult *res, int tup_num, int field_num );
+extern int pq_ntuples( PGresult *res );
+extern int pq_nfields( PGresult *res );
+extern char* pq_fname( PGresult *res, int field_num );

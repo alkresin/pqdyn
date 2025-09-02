@@ -1,16 +1,20 @@
 /*
  */
 
-FUNCTION Main()
+FUNCTION Main( cHost )
 
-   IF pg_Init( "c:\softools\postgres\libpq.dll" ) != 0
+   IF pq_Init( "c:\softools\postgres\libpq.dll" ) != 0
       ? "Can't load libpq"
       RETURN Nil
    ENDIF
 
-   ? "Library version:", pg_LibVersion()
+   ? "Library version:", pq_LibVersion()
+   IF !Empty( cHost )
+      ? "Ping:", pq_ping( "host=" + cHost )
+      // ? "Ping:", pq_ping( "postgresql://" + cHost )
+   ENDIF
 
-   pg_Exit( )
+   pq_Exit( )
 
    ? "Press ant key"
    Inkey(0)

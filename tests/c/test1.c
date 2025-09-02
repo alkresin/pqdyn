@@ -3,15 +3,15 @@
 
 int main( void ) {
 
-   if( pg_Init( "c:\\softools\\postgres\\libpq.dll" ) ) {
-   //if( pg_Init( NULL ) ) {
+   if( pq_Init( "c:\\softools\\postgres\\libpq.dll" ) ) {
+   //if( pq_Init( NULL ) ) {
       printf( "Can't load libpq" );
       return -1;
    }
 
-   printf( "Library version: %d\n", pg_libVersion() );
+   printf( "Library version: %d\n", pq_libVersion() );
 
-   pg_Exit();
+   pq_Exit();
 
    return 0;
 }

@@ -3,6 +3,7 @@
 *.lib
 *.a
 *.obj
+*.o
 *.log
 *.out
-Far*
+temp/*
