@@ -8,7 +8,7 @@
 
 #include "pg.h"
 
-/* pq_Init( [ cDllName ] )
+/* pq_Init( [ cDllName ] ) --> nResult
  */
 HB_FUNC( PQ_INIT ) {
 

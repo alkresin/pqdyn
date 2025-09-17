@@ -14,3 +14,37 @@ dynamically when the ready application needs them, no need for libpq files befor
 
 hbPQdyn provides a minimum set of functions, those only, which are really necessary, IMO, to use PostgreSQL.
 This approach makes life easier for the developer.
+
+## Functions list
+
+#### pq_Init( [ cDllName ] ) --> nResult
+
+#### pq_Exit()
+
+#### pq_LibVersion() -> nVersion
+
+#### pq_SrvVersion( pConnection ) -> nVersion
+
+#### pq_Oing( cConnInfo ) -> nResult
+
+#### pq_ConnectDB( cConnInfo ) -> pConnection
+
+#### pq_Status( pConnection ) -> nStatus
+
+#### pq_Finish( pConnection ) -> nStatus
+
+#### pq_Exec( pConnection, cQuery ) -> pResult
+
+#### pq_ExecParams( pConnection, cQuery, aValues ) -> pResult
+
+#### pq_ResultStatus( pResult ) -> nStatus
+
+#### pq_Clear( pResult )
+
+#### pq_GetValue( pResult, nRow, nCol ) -> cValue
+
+#### pq_NTuples( pResult ) -> nTuples
+
+#### pq_NFields( pResult ) -> nFields
+
+#### pq_FName( pResult, int nField ) -> cName
