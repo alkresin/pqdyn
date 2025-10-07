@@ -1,4 +1,9 @@
 /*
+ * hbPQdyn - Harbour PostgreSQL API
+ * Test of Harbour bindings
+ *
+ * Copyright 2025 Alexander S.Kresin <alex@kresin.ru>
+ * www - http://www.kresin.ru
  */
 
 FUNCTION Main( cHost, cDbName, cUser, cPass )

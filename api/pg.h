@@ -1,3 +1,10 @@
+/*
+ * hbPQdyn - Harbour PostgreSQL API
+ * Header file
+ *
+ * Copyright 2025 Alexander S.Kresin <alex@kresin.ru>
+ * www - http://www.kresin.ru
+ */
 
 /* PGconn encapsulates a connection to the backend.
  * The contents of this struct are not supposed to be known to applications.

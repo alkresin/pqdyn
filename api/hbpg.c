@@ -1,4 +1,10 @@
-
+/*
+ * hbPQdyn - Harbour PostgreSQL API
+ * Harbour bindings for libpq - dynamic linking
+ *
+ * Copyright 2025 Alexander S.Kresin <alex@kresin.ru>
+ * www - http://www.kresin.ru
+ */
 
 #include "hbapi.h"
 #include "hbapifs.h"

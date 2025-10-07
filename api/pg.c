@@ -1,5 +1,5 @@
 /*
- * HbPostgres - Harbour PostgreSQL API
+ * hbPQdyn - Harbour PostgreSQL API
  * C bindings for libpq - dynamic linking
  *
  * Copyright 2025 Alexander S.Kresin <alex@kresin.ru>
