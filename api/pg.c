@@ -280,6 +280,9 @@ static void FindAndOpenLib( const char* szDllName ) {
 
 int pq_Init( const char* szDllName ) {
 
+   if( pDll )
+      return 0;
+
    FindAndOpenLib( szDllName );
    if (!pDll ) {
       c_writelog( NULL, "Failed to load library\n" );
