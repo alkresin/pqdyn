@@ -58,6 +58,7 @@ static ppq_ntuples_t ppq_ntuples = NULL;
 static ppq_nfields_t ppq_nfields = NULL;
 static ppq_fname_t ppq_fname = NULL;
 
+static char * errNoFunc = "Failed to get %s\n";
 LIB_HANDLE pDll = NULL;
 
 void c_writelog( const char * sFile, const char * sTraceMsg, ... )
@@ -66,7 +67,7 @@ void c_writelog( const char * sFile, const char * sTraceMsg, ... )
 
    if( sFile == NULL )
    {
-      hFile = fopen( "ac.log", "a" );
+      hFile = fopen( "pqdyn.log", "a" );
    }
    else
    {
@@ -156,8 +157,6 @@ static void FindAndOpenLib( const char* szDllName ) {
 
    if( !szDllName ) {
       pDll = LoadLibraryA( "libpq.dll" );
-      if( !pDll )
-         c_writelog( NULL, "Failed to load libpq.dll\n" );
       return;
    }
 
@@ -290,44 +289,50 @@ int pq_Init( const char* szDllName ) {
    }
 
    if( !ppq_connectdb ) {
-      ppq_connectdb = (ppq_connectdb_t)GET_FUNCTION( pDll, "PQconnectdb" );
+      char *szFunc = "PQconnectdb";
+      ppq_connectdb = (ppq_connectdb_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_connectdb ) {
-         c_writelog( NULL, "Failed to get PQconnectdb\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return 2;
       }
    }
    if( !ppq_finish ) {
-      ppq_finish = (ppq_finish_t)GET_FUNCTION( pDll, "PQfinish" );
+      char *szFunc = "PQfinish";
+      ppq_finish = (ppq_finish_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_finish ) {
-         c_writelog( NULL, "Failed to get PQfinish\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return 2;
       }
    }
    if( !ppq_exec ) {
-      ppq_exec = (ppq_exec_t)GET_FUNCTION( pDll, "PQexec" );
+      char *szFunc = "PQexec";
+      ppq_exec = (ppq_exec_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_exec ) {
-         c_writelog( NULL, "Failed to get PQexec\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return 2;
       }
    }
    if( !ppq_execParams ) {
-      ppq_execParams = (ppq_execParams_t)GET_FUNCTION( pDll, "PQexecParams" );
+      char *szFunc = "PQexecParams";
+      ppq_execParams = (ppq_execParams_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_exec ) {
-         c_writelog( NULL, "Failed to get PQexecParams\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return 2;
       }
    }
    if( !ppq_status ) {
-      ppq_status = (ppq_status_t)GET_FUNCTION( pDll, "PQstatus" );
+      char *szFunc = "PQstatus";
+      ppq_status = (ppq_status_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_status ) {
-         c_writelog( NULL, "Failed to get PQstatus\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
    if( !ppq_resultStatus ) {
-      ppq_resultStatus = (ppq_resultStatus_t)GET_FUNCTION( pDll, "PQresultStatus" );
+      char *szFunc = "PQresultStatus";
+      ppq_resultStatus = (ppq_resultStatus_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_resultStatus ) {
-         c_writelog( NULL, "Failed to get PQresultStatus\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
@@ -347,9 +352,10 @@ int pq_libVersion() {
    if( !pDll )
       return -1;
    if( !ppq_libver ) {
-      ppq_libver = (ppq_libver_t)GET_FUNCTION( pDll, "PQlibVersion" );
+      char *szFunc = "PQlibVersion";
+      ppq_libver = (ppq_libver_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_libver ) {
-         c_writelog( NULL, "Failed to get PQlibVersion\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
@@ -361,9 +367,10 @@ int pq_srvVersion( const PGconn * conn ) {
    if( !pDll )
       return -1;
    if( !ppq_srvver ) {
-      ppq_srvver = (ppq_srvver_t)GET_FUNCTION( pDll, "PQserverVersion" );
+      char *szFunc = "PQserverVersion";
+      ppq_srvver = (ppq_srvver_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_srvver ) {
-         c_writelog( NULL, "Failed to get PQserverVersion\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
@@ -375,9 +382,10 @@ PGPing pq_ping( const char * szConnInfo ) {
    if( !pDll )
       return -1;
    if( !ppq_ping ) {
-      ppq_ping = (ppq_ping_t)GET_FUNCTION( pDll, "PQping" );
+      char *szFunc = "PQping";
+      ppq_ping = (ppq_ping_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_ping ) {
-         c_writelog( NULL, "Failed to get PQping\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
@@ -441,9 +449,10 @@ char* pq_getvalue( const PGresult *res, int tup_num, int field_num ) {
    if( !pDll )
       return NULL;
    if( !ppq_getvalue ) {
-      ppq_getvalue = (ppq_getvalue_t)GET_FUNCTION( pDll, "PQgetvalue" );
+      char *szFunc = "PQgetvalue";
+      ppq_getvalue = (ppq_getvalue_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_getvalue ) {
-         c_writelog( NULL, "Failed to get PQgetvalue\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return NULL;
       }
    }
@@ -455,9 +464,10 @@ int pq_ntuples( PGresult *res ) {
    if( !pDll )
       return -1;
    if( !ppq_ntuples ) {
-      ppq_ntuples = (ppq_ntuples_t)GET_FUNCTION( pDll, "PQntuples" );
+      char *szFunc = "PQntuples";
+      ppq_ntuples = (ppq_ntuples_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_ntuples ) {
-         c_writelog( NULL, "Failed to get PQntuples\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
@@ -470,9 +480,10 @@ int pq_nfields( PGresult *res ) {
    if( !pDll )
       return -1;
    if( !ppq_nfields ) {
-      ppq_nfields = (ppq_nfields_t)GET_FUNCTION( pDll, "PQnfields" );
+      char *szFunc = "PQnfields";
+      ppq_nfields = (ppq_nfields_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_ntuples ) {
-         c_writelog( NULL, "Failed to get PQnfields\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return -1;
       }
    }
@@ -485,9 +496,10 @@ char * pq_fname( PGresult *res, int field_num ) {
    if( !pDll )
       return NULL;
    if( !ppq_fname ) {
-      ppq_fname = (ppq_fname_t)GET_FUNCTION( pDll, "PQfname" );
+      char *szFunc = "PQfname";
+      ppq_fname = (ppq_fname_t)GET_FUNCTION( pDll, szFunc );
       if( !ppq_fname ) {
-         c_writelog( NULL, "Failed to get PQfname\n" );
+         c_writelog( NULL, errNoFunc, szFunc );
          return NULL;
       }
    }
